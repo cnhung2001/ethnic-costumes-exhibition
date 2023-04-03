@@ -64,15 +64,14 @@ function loadPosition() {
     .then((response) => response.json())
     .then((data) => {
       for (let i = 0; i < data.length; i++) {
-        Promise.all([loadAsync("public/assets/model/house.glb")]).then(
-          (models) => {
-            const newHouse = models[0].scene.children[0]
-            const item = data[i]
-            newHouse.position.set(item.x, item.y, item.z)
-            newHouse.name = item.RID.toString()
-            scene.add(newHouse)
-          }
-        )
+        const item = data[i]
+        Promise.all([loadAsync(item.Dpath)]).then((models) => {
+          const newHouse = models[0].scene.children[0]
+
+          newHouse.position.set(item.x, item.y, item.z)
+          newHouse.name = item.RID.toString()
+          scene.add(newHouse)
+        })
       }
     })
     .catch((error) => console.error(error))

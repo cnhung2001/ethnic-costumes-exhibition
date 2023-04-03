@@ -13,11 +13,12 @@ const renderer = new THREE.WebGL1Renderer({
 
 scene.background = new THREE.Color(0xdddddd)
 
-const loader = new GLTFLoader()
+const loaderModel = new GLTFLoader()
+const loaderImage = new THREE.TextureLoader()
 
 const loadAsync = (url) => {
   return new Promise((resolve) => {
-    loader.load(url, (gltf) => {
+    loaderModel.load(url, (gltf) => {
       resolve(gltf)
     })
   })
@@ -28,11 +29,27 @@ function loadPosition() {
     .then((response) => response.json())
     .then((data) => {
       data.forEach((item) => {
-        loadAsync(`public/assets/model/${item.Dpath}`).then((model) => {
-          const newModel = model.scene.children[0]
-          newModel.position.set(item.x, item.y, item.z)
-          scene.add(newModel)
-        })
+        console.log(item.Dtype)
+        if (item.Dtype == "model") {
+          Promise.all([loadAsync(`public/assets/model/${item.Dpath}`)]).then(
+            (model) => {
+              const newModel = model[0].scene.children[0]
+              newModel.position.set(item.x, item.y, item.z)
+              scene.add(newModel)
+            }
+          )
+        } else if (item.Dtype == "image") {
+          var material = new THREE.MeshLambertMaterial({
+            map: loaderImage.load(`public/assets/image/${item.Dpath}`),
+          })
+
+          var geometry = new THREE.PlaneGeometry(10, 10 * 0.75)
+
+          var mesh = new THREE.Mesh(geometry, material)
+
+          mesh.position.set(6, 0, 0)
+          scene.add(mesh)
+        }
       })
     })
     .catch((error) => console.error(error))

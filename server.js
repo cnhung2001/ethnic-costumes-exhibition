@@ -59,20 +59,23 @@ app.get("/public/javascripts/*", function (req, res) {
 // })
 
 app.get("/rooms", (req, res) => {
-  connection.query("SELECT * FROM Rooms", (error, results) => {
-    if (error) {
-      console.error(error)
-      res.status(500).send("Internal server error")
-    } else {
-      res.json(results)
+  connection.query(
+    "SELECT rooms.*, Datas.Dpath FROM rooms JOIN datas ON rooms.DID = datas.DID;",
+    (error, results) => {
+      if (error) {
+        console.error(error)
+        res.status(500).send("Internal server error")
+      } else {
+        res.json(results)
+      }
     }
-  })
+  )
 })
 
 app.get("/room-data", (req, res) => {
   const roomId = req.query.id
   connection.query(
-    `SELECT Datas.Dpath, RoomDetails.x, RoomDetails.y, RoomDetails.z FROM Datas JOIN RoomDetails ON Datas.DID = RoomDetails.DID WHERE RoomDetails.RID = '${roomId}';`,
+    `SELECT  Datas.Dtype, Datas.Dpath, RoomDetails.x, RoomDetails.y, RoomDetails.z FROM Datas JOIN RoomDetails ON Datas.DID = RoomDetails.DID WHERE RoomDetails.RID = '${roomId}';`,
     (error, results) => {
       if (error) {
         console.error(error)
