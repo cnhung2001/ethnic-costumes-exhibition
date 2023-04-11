@@ -1,6 +1,7 @@
 import * as THREE from "https://cdn.skypack.dev/three@0.129.0/build/three.module.js"
 import { OrbitControls } from "https://cdn.skypack.dev/three@0.129.0/examples/jsm/controls/OrbitControls.js"
 import { GLTFLoader } from "https://cdn.skypack.dev/three@0.129.0/examples/jsm/loaders/GLTFLoader.js"
+import { TransformControls } from "https://cdn.skypack.dev/three@0.129.0/examples/jsm/controls/TransformControls.js"
 
 const canvas = document.querySelector(".webgl")
 const scene = new THREE.Scene()
@@ -10,19 +11,37 @@ const renderer = new THREE.WebGL1Renderer({
   antialias: true,
 })
 
-scene.background = new THREE.Color(0xdddddd)
-
 const sizes = {
   width: window.innerWidth,
   height: window.innerHeight,
 }
+scene.background = new THREE.Color(0xdddddd)
 
 renderer.setSize(sizes.width, sizes.height)
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 renderer.shadowMap.enabled = true
 renderer.gammaOutput = true
 
-const loader = new GLTFLoader()
+const loadingManager = new THREE.LoadingManager()
+
+const loader = new GLTFLoader(loadingManager)
+
+//loading
+// loadingManager.onStart = function (url, iteam, total) {
+//   console.log(`Started loading ${url}`)
+// }
+
+const progressBar = document.getElementById("progress-bar")
+
+loadingManager.onProgress = function (url, loaded, total) {
+  progressBar.value = (loaded / total) * 100
+}
+
+const progressBarContainer = document.querySelector(".progress-bar-container")
+
+loadingManager.onLoad = function () {
+  progressBarContainer.style.display = "none"
+}
 
 const loadAsync = (url) => {
   return new Promise((resolve) => {
@@ -35,29 +54,25 @@ const loadAsync = (url) => {
 const raycaster = new THREE.Raycaster()
 const mouse = new THREE.Vector2()
 
-function onMouseMove(event) {
-  // Lấy tọa độ chuột
+window.addEventListener("click", (event) => {
   mouse.x = (event.clientX / window.innerWidth) * 2 - 1
   mouse.y = -(event.clientY / window.innerHeight) * 2 + 1
-}
 
-function onClick() {
-  // Kiểm tra xem chuột có đang nhấp vào bất kỳ vật thể nào không
   raycaster.setFromCamera(mouse, camera)
-  const intersects = raycaster.intersectObjects(scene.children, true)
-
+  const intersects = raycaster.intersectObjects(
+    objects.map((object) => object.boxHelper)
+  )
   if (intersects.length > 0) {
-    // Nếu có, in ra tên đối tượng đó
-    const object = intersects[0].object.parent
-    if (object.name.length === 1) {
-      console.log(object.name)
-      window.location.href = "/room?id=" + object.name
-    }
+    const selectedObject = objects.find(
+      (object) => object.boxHelper === intersects[0].object
+    )
+    const selectedModel = selectedObject.model
+    // console.log("Clicked on object: ", selectedModel)
+    window.location.href = "/room?id=" + selectedModel.name
   }
-}
+})
 
-window.addEventListener("mousemove", onMouseMove, false)
-window.addEventListener("click", onClick, false)
+const objects = []
 
 function loadPosition() {
   fetch("/rooms")
@@ -67,10 +82,21 @@ function loadPosition() {
         const item = data[i]
         Promise.all([loadAsync(item.Dpath)]).then((models) => {
           const newHouse = models[0].scene.children[0]
-
           newHouse.position.set(item.x, item.y, item.z)
           newHouse.name = item.RID.toString()
           scene.add(newHouse)
+          //const box = new THREE.Box3().setFromObject(newHouse)
+          //scene.add(box)
+          //console.log(box.min)
+          var helper = new THREE.BoxHelper(newHouse)
+          helper.visible = false
+          helper.update()
+          // If you want a visible bounding box
+          scene.add(helper)
+          objects.push({
+            model: newHouse,
+            boxHelper: helper,
+          })
         })
       }
     })
@@ -80,8 +106,8 @@ function loadPosition() {
 loadPosition()
 
 // thêm lưới nền
-const gridHelper = new THREE.GridHelper(1000, 100)
-scene.add(gridHelper)
+// const gridHelper = new THREE.GridHelper(1000, 100)
+// scene.add(gridHelper)
 
 const light = new THREE.DirectionalLight(0xffffff, 1)
 light.position.set(20, 10, 30)
@@ -120,6 +146,29 @@ scene.add(camera)
 const controls = new OrbitControls(camera, renderer.domElement)
 controls.addEventListener("change", render)
 
+const geometry = new THREE.BoxGeometry(1, 1, 1)
+const material = new THREE.MeshBasicMaterial({
+  color: 0x00ff00,
+})
+
+const cube = new THREE.Mesh(geometry, material)
+scene.add(cube)
+cube.position.set(15, 0, 0)
+
+// If you just want the numbers
+// console.log(helper.box.min)
+// console.log(helper.box.max)
+
+// const tControl = new TransformControls(camera, renderer.domElement)
+
+// tControl.addEventListener("dragging-changed", (e) => {
+//   orbit.enabled = !e.value
+// })
+
+// tControl.attach(cube)
+// scene.add(tControl)
+// tControl.setMode("translate")
+
 window.addEventListener("resize", onWindowResize, false)
 function onWindowResize() {
   camera.aspect = window.innerWidth / window.innerHeight
@@ -143,6 +192,11 @@ function handleKeyDown(event) {
   if (code === "ArrowDown") {
     camera.position.y -= cameraSpeed
   }
+  if (code === "KeyG") {
+    controls.enableZoom = !controls.enableZoom
+    controls.enableRotate = !controls.enableRotate
+    controls.enablePan = !controls.enablePan
+  }
 }
 document.addEventListener("keydown", handleKeyDown)
 
@@ -150,6 +204,7 @@ function animate() {
   requestAnimationFrame(animate)
   controls.update()
   // renderer.render(scene, camera)
+  //controls1.update()
 
   render()
 }

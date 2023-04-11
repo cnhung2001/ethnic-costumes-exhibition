@@ -5,6 +5,7 @@ const path = require("path")
 const cookieParser = require("cookie-parser")
 const logger = require("morgan")
 const connection = require("./config/database")
+const bcrypt = require("bcrypt")
 
 const port = process.env.PORT || 3000
 
@@ -75,7 +76,7 @@ app.get("/rooms", (req, res) => {
 app.get("/room-data", (req, res) => {
   const roomId = req.query.id
   connection.query(
-    `SELECT  Datas.Dtype, Datas.Dpath, RoomDetails.x, RoomDetails.y, RoomDetails.z FROM Datas JOIN RoomDetails ON Datas.DID = RoomDetails.DID WHERE RoomDetails.RID = '${roomId}';`,
+    `SELECT  Datas.Did, Datas.Dtype, Datas.Dpath, RoomDetails.x, RoomDetails.y, RoomDetails.z, RoomDetails.rx, RoomDetails.ry, RoomDetails.rz, RoomDetails.sx, RoomDetails.sy, RoomDetails.sz FROM Datas JOIN RoomDetails ON Datas.DID = RoomDetails.DID WHERE RoomDetails.RID = '${roomId}';`,
     (error, results) => {
       if (error) {
         console.error(error)
@@ -107,6 +108,34 @@ app.get("/myroom", (req, res) => {
       res.json(results)
     }
   })
+})
+
+app.post("/save-data", function (req, res) {
+  const { roomId, modelId, position, rotation, scale } = req.body
+  connection.query(
+    `UPDATE RoomDetails SET x='${position.x}', y='${position.y}', z='${position.z}', rx='${rotation.x}', ry='${rotation.y}', rz='${rotation.z}', sx='${scale.x}',sy='${scale.y}', sz='${scale.z}' where rid='${roomId.roomId}' and did='${modelId.modelId}' ;`,
+    (error, results) => {
+      if (error) {
+        console.error(error)
+      }
+    }
+  )
+  console.log(
+    `Saved data: position = ${JSON.stringify(
+      position
+    )}, rotation = ${JSON.stringify(rotation)}, scale = ${JSON.stringify(
+      scale
+    )}`
+  )
+  res.status(200).send("Data saved successfully")
+})
+
+app.get("/login", (req, res) => {
+  res.render("login.html")
+})
+
+app.get("/register", (req, res) => {
+  res.render("register.html")
 })
 
 http.listen(port, function () {
