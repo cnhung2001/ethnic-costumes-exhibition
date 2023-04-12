@@ -15,7 +15,7 @@ const sizes = {
   width: window.innerWidth,
   height: window.innerHeight,
 }
-scene.background = new THREE.Color(0xdddddd)
+scene.background = new THREE.Color("skyblue")
 
 renderer.setSize(sizes.width, sizes.height)
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
@@ -146,14 +146,14 @@ scene.add(camera)
 const controls = new OrbitControls(camera, renderer.domElement)
 controls.addEventListener("change", render)
 
-const geometry = new THREE.BoxGeometry(1, 1, 1)
-const material = new THREE.MeshBasicMaterial({
-  color: 0x00ff00,
-})
+// const geometry = new THREE.BoxGeometry(1, 1, 1)
+// const material = new THREE.MeshBasicMaterial({
+//   color: 0x00ff00,
+// })
 
-const cube = new THREE.Mesh(geometry, material)
-scene.add(cube)
-cube.position.set(15, 0, 0)
+// const cube = new THREE.Mesh(geometry, material)
+// scene.add(cube)
+// cube.position.set(15, 0, 0)
 
 // If you just want the numbers
 // console.log(helper.box.min)

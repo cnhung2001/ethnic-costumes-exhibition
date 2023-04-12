@@ -23,7 +23,7 @@ const camera = new THREE.PerspectiveCamera(
   75,
   sizes.width / sizes.height,
   0.1,
-  1000
+  2000
 )
 
 camera.position.set(30, 30, 30)
@@ -33,6 +33,33 @@ const controls = new OrbitControls(camera, renderer.domElement)
 
 const loaderModel = new GLTFLoader()
 const loaderImage = new THREE.TextureLoader()
+const loaderText = new THREE.FontLoader()
+
+loaderText.load("public/assets/font/Open_Sans_Bold.json", function (font) {
+  const geometry = new THREE.TextGeometry("Tày", {
+    font: font,
+    size: 3,
+    height: 1,
+    curveSegments: 10,
+    bevelEnabled: false,
+    bevelOffset: 0,
+    bevelSegments: 1,
+    bevelSize: 0.3,
+    bevelThickness: 1,
+  })
+  const materials = [
+    new THREE.MeshPhongMaterial({ color: 0xa8325c }), // front
+    new THREE.MeshPhongMaterial({ color: 0x540722 }), // side
+  ]
+  const textMesh2 = new THREE.Mesh(geometry, materials)
+  textMesh2.castShadow = true
+  textMesh2.position.y += 5
+  textMesh2.position.x -= 10
+  textMesh2.position.z = 15
+
+  textMesh2.rotation.y = 1.6
+  scene.add(textMesh2)
+})
 
 scene.background = new THREE.Color("skyblue")
 
@@ -62,15 +89,16 @@ function loadPosition() {
     .then((response) => response.json())
     .then((data) => {
       data.forEach((item) => {
-        console.log(item.Dtype)
+        //console.log(item.Dtype)
         if (item.Dtype == "model") {
           Promise.all([loadAsync(`public/assets/model/${item.Dpath}`)]).then(
             (model) => {
+              //console.log(item.x)
               const newModel = model[0].scene.children[0]
               newModel.position.set(item.x, item.y, item.z)
               newModel.rotation.set(item.rx, item.ry, item.rz)
               newModel.scale.set(item.sx, item.sy, item.sz)
-              newModel.name = item.Did
+              newModel.name = item.id
               scene.add(newModel)
               var helper = new THREE.BoxHelper(newModel)
               //helper.visible = false
@@ -83,13 +111,28 @@ function loadPosition() {
             }
           )
         } else if (item.Dtype == "image") {
+          // const objectImage = []
+          // objectImage.push(
+          //   loaderImage.load(`public/assets/image/${item.Dpath}`)
+          // )
+          // console.log(objectImage[0])
           var material = new THREE.MeshLambertMaterial({
-            map: loaderImage.load(`public/assets/image/${item.Dpath}`),
+            map: loaderImage.load(`${item.Dpath}`),
           })
-          var geometry = new THREE.PlaneGeometry(10, 10 * 0.75)
+          var geometry = new THREE.PlaneGeometry(item.sx, item.sy)
           var mesh = new THREE.Mesh(geometry, material)
-          mesh.position.set(6, 0, 0)
+          mesh.position.set(item.x, item.y, item.z)
+          mesh.rotation.set(item.rx, item.ry, item.rz)
+          mesh.scale.set(item.sx, item.sy, item.sz)
           scene.add(mesh)
+          mesh.name = item.id
+          var helper = new THREE.BoxHelper(mesh)
+          scene.add(helper)
+          objects.push({
+            model: mesh,
+            boxHelper: helper,
+          })
+          helper.update()
         }
       })
     })
@@ -106,10 +149,25 @@ tControl.addEventListener("dragging-changed", (e) => {
   }
 })
 
+const overlay = document.querySelector("#overlay")
+const popup = document.createElement("div")
+popup.innerHTML = "<p></p>"
+
+popup.style.position = "absolute"
+popup.style.top = "50%"
+popup.style.left = "50%"
+popup.style.transform = "translate(-50%, -50%)"
+popup.style.backgroundColor = "white"
+popup.style.padding = "20px"
+overlay.appendChild(popup)
+
 const raycaster = new THREE.Raycaster()
 const mouse = new THREE.Vector2()
 
 window.addEventListener("click", (event) => {
+  if ((overlay.style.opacity = "1")) {
+    overlay.style.opacity = "0"
+  }
   mouse.x = (event.clientX / window.innerWidth) * 2 - 1
   mouse.y = -(event.clientY / window.innerHeight) * 2 + 1
 
@@ -126,14 +184,17 @@ window.addEventListener("click", (event) => {
     tControl.attach(selectedModel)
     scene.add(tControl)
     tControl.setMode("translate")
-    console.log(selectedModel.position)
+    console.log(selectedModel.userData.name)
+
+    if (selectedModel.userData.name == "taynam02") {
+      overlay.style.opacity = "1"
+    }
   }
 })
 
 // const searchParams = new URLSearchParams(window.location.search)
 // const roomId = searchParams.get("id")
-
-console.log(typeof roomId)
+console.log(objects)
 
 document.addEventListener("keydown", function (event) {
   if (event.key === "Enter") {
@@ -173,6 +234,11 @@ light.position.set(20, 10, 30)
 light.lookAt(0, 0, 0)
 scene.add(light)
 
+const light2 = new THREE.DirectionalLight(0xffffff, 0.5)
+light2.position.set(0, 30, 0)
+light2.lookAt(0, 0, 0)
+scene.add(light2)
+
 //controls.addEventListener("change", renderer) //error
 
 renderer.setSize(sizes.width, sizes.height)
@@ -180,7 +246,7 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 renderer.shadowMap.enabled = true
 renderer.gammaOutput = true
 
-const cameraSpeed = 0.1
+const cameraSpeed = 0.5
 function handleKeyDown(event) {
   const code = event.code
   if (code === "ArrowLeft") {

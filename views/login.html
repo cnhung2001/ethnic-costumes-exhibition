@@ -5,27 +5,31 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
+    <link rel="stylesheet" href="../public/stylesheets/style_login.css" />
   </head>
   <body>
-    <h1>Login</h1>
-
-    <form action="/auth/login" method="POST">
-      <div>
-        <label for="email">Email</label>
-        <input
-          type="email"
-          id="email"
-          name="email"
-          placeholder="your email address"
-          required
-        />
+    <section>
+      <div class="wrapper">
+        <h1>Đăng nhập</h1>
+        <form class="form-login" action="/auth/login" method="POST">
+          <div class="input-form">
+            <label class="text" vfor="email">Email</label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              placeholder="your email address"
+              required
+            />
+          </div>
+          <div class="input-form">
+            <label class="text" for="password">Password</label>
+            <input type="password" id="password" name="password" required />
+          </div>
+          <button type="submit">Đăng nhập</button>
+        </form>
+        <p>Bạn chưa có tài khoản?<a href="/register">Đăng ký</a></p>
       </div>
-      <div>
-        <label for="password">Password</label>
-        <input type="password" id="password" name="password" required />
-      </div>
-      <button type="submit">Login</button>
-    </form>
-    <a href="/register">Register</a>
+    </section>
   </body>
 </html>

@@ -45,6 +45,11 @@ app.get("/public/assets/image/*", function (req, res) {
   res.sendFile(path.join(__dirname, "/public/assets/image", fileName))
 })
 
+app.get("/public/assets/font/*", function (req, res) {
+  const fileName = req.path.split("/").pop()
+  res.sendFile(path.join(__dirname, "/public/assets/font", fileName))
+})
+
 app.get("/public/stylesheets/*", function (req, res) {
   const fileName = req.path.split("/").pop()
   res.sendFile(path.join(__dirname, "/public/stylesheets", fileName))
@@ -77,7 +82,7 @@ app.get("/rooms", (req, res) => {
 app.get("/room-data", (req, res) => {
   const roomId = req.query.id
   connection.query(
-    `SELECT  Datas.Did, Datas.Dtype, Datas.Dpath, RoomDetails.x, RoomDetails.y, RoomDetails.z, RoomDetails.rx, RoomDetails.ry, RoomDetails.rz, RoomDetails.sx, RoomDetails.sy, RoomDetails.sz FROM Datas JOIN RoomDetails ON Datas.DID = RoomDetails.DID WHERE RoomDetails.RID = '${roomId}';`,
+    `SELECT  RoomDetails.id, Datas.Dtype, Datas.Dpath, RoomDetails.x, RoomDetails.y, RoomDetails.z, RoomDetails.rx, RoomDetails.ry, RoomDetails.rz, RoomDetails.sx, RoomDetails.sy, RoomDetails.sz FROM Datas JOIN RoomDetails ON Datas.DID = RoomDetails.DID WHERE RoomDetails.RID = '${roomId}';`,
     (error, results) => {
       if (error) {
         console.error(error)
@@ -114,7 +119,7 @@ app.get("/myroom", (req, res) => {
 app.post("/save-data", function (req, res) {
   const { roomId, modelId, position, rotation, scale } = req.body
   connection.query(
-    `UPDATE RoomDetails SET x='${position.x}', y='${position.y}', z='${position.z}', rx='${rotation.x}', ry='${rotation.y}', rz='${rotation.z}', sx='${scale.x}',sy='${scale.y}', sz='${scale.z}' where rid='${roomId.roomId}' and did='${modelId.modelId}' ;`,
+    `UPDATE RoomDetails SET x='${position.x}', y='${position.y}', z='${position.z}', rx='${rotation.x}', ry='${rotation.y}', rz='${rotation.z}', sx='${scale.x}',sy='${scale.y}', sz='${scale.z}' where id='${modelId.modelId}' ;`,
     (error, results) => {
       if (error) {
         console.error(error)
