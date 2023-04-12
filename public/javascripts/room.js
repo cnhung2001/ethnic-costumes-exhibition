@@ -165,8 +165,8 @@ document.addEventListener("keydown", function (event) {
 })
 
 // thêm lưới nền
-const gridHelper = new THREE.GridHelper(1000, 100)
-scene.add(gridHelper)
+// const gridHelper = new THREE.GridHelper(1000, 100)
+// scene.add(gridHelper)
 
 const light = new THREE.DirectionalLight(0xffffff, 1)
 light.position.set(20, 10, 30)

@@ -5,7 +5,7 @@ const path = require("path")
 const cookieParser = require("cookie-parser")
 const logger = require("morgan")
 const connection = require("./config/database")
-const bcrypt = require("bcrypt")
+require("dotenv").config()
 
 const port = process.env.PORT || 3000
 
@@ -21,6 +21,7 @@ app.use(express.static(path.join(__dirname, "public")))
 
 app.use("/", require("./routes/rooms"))
 //app.use("/", require("./routes/myroom"))
+app.use("/auth", require("./routes/auth"))
 
 app.get("/", (req, res) => {
   res.render("index")
@@ -137,6 +138,8 @@ app.get("/login", (req, res) => {
 app.get("/register", (req, res) => {
   res.render("register.html")
 })
+
+app.post("/register", (req, res) => {})
 
 http.listen(port, function () {
   console.log("listening on *:" + port)
