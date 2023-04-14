@@ -20,14 +20,14 @@ const sizes = {
 }
 
 const camera = new THREE.PerspectiveCamera(
-  75,
+  60,
   sizes.width / sizes.height,
   0.1,
-  2000
+  1500
 )
 
-camera.position.set(30, 30, 30)
-camera.lookAt(0, 0, 30)
+camera.position.set(100, 50, 100)
+camera.lookAt(80, 0, 30)
 scene.add(camera)
 const controls = new OrbitControls(camera, renderer.domElement)
 
@@ -35,33 +35,13 @@ const loaderModel = new GLTFLoader()
 const loaderImage = new THREE.TextureLoader()
 const loaderText = new THREE.FontLoader()
 
-loaderText.load("public/assets/font/Open_Sans_Bold.json", function (font) {
-  const geometry = new THREE.TextGeometry("Tày", {
-    font: font,
-    size: 3,
-    height: 1,
-    curveSegments: 10,
-    bevelEnabled: false,
-    bevelOffset: 0,
-    bevelSegments: 1,
-    bevelSize: 0.3,
-    bevelThickness: 1,
-  })
-  const materials = [
-    new THREE.MeshPhongMaterial({ color: 0xa8325c }), // front
-    new THREE.MeshPhongMaterial({ color: 0x540722 }), // side
-  ]
-  const textMesh2 = new THREE.Mesh(geometry, materials)
-  textMesh2.castShadow = true
-  textMesh2.position.y += 5
-  textMesh2.position.x -= 10
-  textMesh2.position.z = 15
-
-  textMesh2.rotation.y = 1.6
-  scene.add(textMesh2)
-})
-
 scene.background = new THREE.Color("skyblue")
+
+// const fwd = new THREE.Vector3(0, 0, 1)
+// fwd.applyMatrix3(camera.matrixWorld).normalize()
+
+// camera.position.set(controls.target).sub(10)
+// //controls.update()
 
 const loadAsync = (url) => {
   return new Promise((resolve) => {
@@ -101,7 +81,7 @@ function loadPosition() {
               newModel.name = item.id
               scene.add(newModel)
               var helper = new THREE.BoxHelper(newModel)
-              //helper.visible = false
+              helper.visible = false
               scene.add(helper)
               objects.push({
                 model: newModel,
@@ -132,8 +112,42 @@ function loadPosition() {
             model: mesh,
             boxHelper: helper,
           })
+          helper.visible = false
+
           helper.update()
         }
+      })
+    })
+    .catch((error) => console.error(error))
+  fetch(`/IslandHeader?id=${roomId}`)
+    .then((response) => response.json())
+    .then((data) => {
+      data.forEach((item) => {
+        //console.log(item)
+        loaderText.load(item.fontpath, function (font) {
+          const geometry = new THREE.TextGeometry(item.content, {
+            font: font,
+            size: item.size,
+            height: item.height,
+            curveSegments: 10,
+            bevelEnabled: false,
+            bevelOffset: 0,
+            bevelSegments: 1,
+            bevelSize: 0.3,
+            bevelThickness: 1,
+          })
+          const materials = [
+            new THREE.MeshPhongMaterial({ color: 0xa8325c }), // front
+            new THREE.MeshPhongMaterial({ color: 0x540722 }), // side
+          ]
+          const textMesh3 = new THREE.Mesh(geometry, materials)
+          textMesh3.castShadow = true
+          textMesh3.position.x = item.x - 12
+          textMesh3.position.y = item.y
+          textMesh3.position.z = item.z - 7.5
+
+          scene.add(textMesh3)
+        })
       })
     })
     .catch((error) => console.error(error))
@@ -151,7 +165,7 @@ tControl.addEventListener("dragging-changed", (e) => {
 
 const overlay = document.querySelector("#overlay")
 const popup = document.createElement("div")
-popup.innerHTML = "<p></p>"
+//popup.innerHTML =
 
 popup.style.position = "absolute"
 popup.style.top = "50%"
@@ -163,6 +177,17 @@ overlay.appendChild(popup)
 
 const raycaster = new THREE.Raycaster()
 const mouse = new THREE.Vector2()
+
+window.addEventListener("dblclick", (event) => {
+  var mX = (event.clientX / window.innerWidth) * 2 - 1
+  var mY = -(event.clientY / window.innerHeight) * 2 + 1
+
+  var vector = new THREE.Vector3(mX, mY, 1)
+  vector.unproject(camera)
+  vector.sub(camera.position)
+  camera.position.addVectors(camera.position, vector.setLength(20))
+  controls.target.addVectors(controls.target, vector.setLength(20))
+})
 
 window.addEventListener("click", (event) => {
   if ((overlay.style.opacity = "1")) {

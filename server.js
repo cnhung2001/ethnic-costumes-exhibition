@@ -81,6 +81,7 @@ app.get("/rooms", (req, res) => {
 
 app.get("/room-data", (req, res) => {
   const roomId = req.query.id
+
   connection.query(
     `SELECT  RoomDetails.id, Datas.Dtype, Datas.Dpath, RoomDetails.x, RoomDetails.y, RoomDetails.z, RoomDetails.rx, RoomDetails.ry, RoomDetails.rz, RoomDetails.sx, RoomDetails.sy, RoomDetails.sz FROM Datas JOIN RoomDetails ON Datas.DID = RoomDetails.DID WHERE RoomDetails.RID = '${roomId}';`,
     (error, results) => {
@@ -88,6 +89,22 @@ app.get("/room-data", (req, res) => {
         console.error(error)
         res.status(500).send("Internal server error")
       } else {
+        res.json(results)
+      }
+    }
+  )
+})
+
+app.get("/IslandHeader", (req, res) => {
+  const roomId = req.query.id
+  connection.query(
+    `SELECT IslandHeader.id, IslandHeader.rDid, IslandHeader.content, IslandHeader.fontpath, IslandHeader.size, IslandHeader.height, IslandHeader.color, RoomDetails.x, RoomDetails.y,  RoomDetails.z FROM IslandHeader JOIN RoomDetails ON IslandHeader.rDId = RoomDetails.id WHERE RoomDetails.RID = '${roomId}';`,
+    (error, results) => {
+      if (error) {
+        console.error(error)
+        res.status(500).send("Internal server error")
+      } else {
+        //console.log(results)
         res.json(results)
       }
     }
