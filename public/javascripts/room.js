@@ -3,6 +3,7 @@ import { OrbitControls } from "https://cdn.skypack.dev/three@0.129.0/examples/js
 import { GLTFLoader } from "https://cdn.skypack.dev/three@0.129.0/examples/jsm/loaders/GLTFLoader.js"
 import datGui from "https://cdn.skypack.dev/dat.gui"
 import { TransformControls } from "https://cdn.skypack.dev/three@0.129.0/examples/jsm/controls/TransformControls.js"
+import tweenJsModernModule from "https://cdn.skypack.dev/tween-js-modern-module"
 
 var roomId = new URLSearchParams(window.location.search).get("id")
 
@@ -26,8 +27,10 @@ const camera = new THREE.PerspectiveCamera(
   1500
 )
 
-camera.position.set(100, 50, 100)
-camera.lookAt(80, 0, 30)
+//set cam default
+camera.position.set(200, 50, 200)
+//camera.lookAt(140, 0, 250)
+console.log(camera.position)
 scene.add(camera)
 const controls = new OrbitControls(camera, renderer.domElement)
 
@@ -35,7 +38,7 @@ const loaderModel = new GLTFLoader()
 const loaderImage = new THREE.TextureLoader()
 const loaderText = new THREE.FontLoader()
 
-scene.background = new THREE.Color("skyblue")
+scene.background = new THREE.Color("rgb(138, 193, 170)")
 
 // const fwd = new THREE.Vector3(0, 0, 1)
 // fwd.applyMatrix3(camera.matrixWorld).normalize()
@@ -81,7 +84,7 @@ function loadPosition() {
               newModel.name = item.id
               scene.add(newModel)
               var helper = new THREE.BoxHelper(newModel)
-              helper.visible = false
+              //helper.visible = false
               scene.add(helper)
               objects.push({
                 model: newModel,
@@ -115,6 +118,8 @@ function loadPosition() {
           helper.visible = false
 
           helper.update()
+        } else if (item.Dtype == "text") {
+          console.log(item.Dpath)
         }
       })
     })
@@ -137,7 +142,7 @@ function loadPosition() {
             bevelThickness: 1,
           })
           const materials = [
-            new THREE.MeshPhongMaterial({ color: 0xa8325c }), // front
+            new THREE.MeshPhongMaterial({ color: "rgb(255, 51, 51)" }), // front
             new THREE.MeshPhongMaterial({ color: 0x540722 }), // side
           ]
           const textMesh3 = new THREE.Mesh(geometry, materials)
@@ -178,21 +183,23 @@ overlay.appendChild(popup)
 const raycaster = new THREE.Raycaster()
 const mouse = new THREE.Vector2()
 
-window.addEventListener("dblclick", (event) => {
-  var mX = (event.clientX / window.innerWidth) * 2 - 1
-  var mY = -(event.clientY / window.innerHeight) * 2 + 1
+// window.addEventListener("dblclick", (event) => {
+//   var mX = (event.clientX / window.innerWidth) * 2 - 1
+//   var mY = -(event.clientY / window.innerHeight) * 2 + 1
 
-  var vector = new THREE.Vector3(mX, mY, 1)
-  vector.unproject(camera)
-  vector.sub(camera.position)
-  camera.position.addVectors(camera.position, vector.setLength(20))
-  controls.target.addVectors(controls.target, vector.setLength(20))
-})
+//   var vector = new THREE.Vector3(mX, mY, 1)
+//   vector.unproject(camera)
+//   vector.sub(camera.position)
+//   camera.position.addVectors(camera.position, vector.setLength(20))
+//   controls.target.addVectors(controls.target, vector.setLength(20))
+//   console.log(controls.target)
+// })
 
 window.addEventListener("click", (event) => {
   if ((overlay.style.opacity = "1")) {
     overlay.style.opacity = "0"
   }
+
   mouse.x = (event.clientX / window.innerWidth) * 2 - 1
   mouse.y = -(event.clientY / window.innerHeight) * 2 + 1
 
@@ -209,9 +216,43 @@ window.addEventListener("click", (event) => {
     tControl.attach(selectedModel)
     scene.add(tControl)
     tControl.setMode("translate")
+    tControl.enabled = false
+    console.log(tControl.enabled)
     console.log(selectedModel.userData.name)
+    console.log(selectedModel.position.x)
+    // controls.target.set(
+    //   selectedModel.position.x,
+    //   selectedModel.position.y,
+    //   selectedModel.position.z
+    // )
+    //camera.lookAt(controls.target)
 
-    if (selectedModel.userData.name == "taynam02") {
+    // camera.position.set(
+    //   selectedModel.position.x,
+    //   selectedModel.position.y,
+    //   selectedModel.position.z
+    // )
+    //default
+    window.addEventListener("dblclick", (event) => {
+      let newX = selectedModel.position.x - 10
+      let newY = selectedModel.position.y
+      let newZ = selectedModel.position.z - 10
+      controls.target.set(newX, newY, newZ)
+      console.log("position cũ", camera.position)
+
+      camera.position.set(newX, newY + 5, newZ + 20)
+
+      console.log("target", controls.target)
+      console.log("position mới", camera.position)
+
+      controls.update()
+    })
+
+    //controls.target.set(selectedModel.item)
+    // console.log(controls.enabled)
+    // console.log(controls.enableZoom)
+
+    if (selectedModel.userData.name == "taynam021") {
       overlay.style.opacity = "1"
     }
   }
@@ -219,7 +260,7 @@ window.addEventListener("click", (event) => {
 
 // const searchParams = new URLSearchParams(window.location.search)
 // const roomId = searchParams.get("id")
-console.log(objects)
+// console.log(objects)
 
 document.addEventListener("keydown", function (event) {
   if (event.key === "Enter") {
@@ -298,16 +339,62 @@ function handleKeyDown(event) {
     tControl.setMode("scale")
   }
   if (code === "KeyC") {
-    tControl.detach()
+    tControl.enabled = !tControl.enabled
   }
   if (code === "Enter") {
   }
 }
 document.addEventListener("keydown", handleKeyDown)
 
-// create an AudioListener and add it to the camera
+const geometry = new THREE.BoxGeometry()
+const material = new THREE.MeshBasicMaterial({
+  color: 0x00ff00,
+  wireframe: true,
+})
+
+const cube = new THREE.Mesh(geometry, material)
+scene.add(cube)
+
+const gui = new datGui.GUI()
+const cubeFolder = gui.addFolder("Cube")
+cubeFolder.add(cube.rotation, "x", 0, Math.PI * 2)
+cubeFolder.add(cube.rotation, "y", 0, Math.PI * 2)
+cubeFolder.add(cube.rotation, "z", 0, Math.PI * 2)
+cubeFolder.open()
+const cameraFolder = gui.addFolder("Camera")
+cameraFolder.add(camera.position, "z", 0, 10)
+cameraFolder.open()
+
+console.log(cubeFolder.name)
+
+if (cubeFolder.name === "Cube") {
+}
+
+var state = "play"
+
 const listener = new THREE.AudioListener()
 camera.add(listener)
+
+const audioLoader = new THREE.AudioLoader()
+
+const backgroundSound = new THREE.Audio(listener)
+audioLoader.load("./assets/sound/soundDemo.mp3", function (buffer) {
+  backgroundSound.setBuffer(buffer)
+  backgroundSound.setLoop(true)
+  backgroundSound.setVolume(1)
+  backgroundSound.play()
+})
+
+var btn = document.getElementById("btn")
+btn.onclick = function myFunction() {
+  if (state == "play") {
+    backgroundSound.pause()
+    state = "stop"
+  } else if (state == "stop") {
+    backgroundSound.play()
+    state = "play"
+  }
+}
 
 function animate() {
   requestAnimationFrame(animate)

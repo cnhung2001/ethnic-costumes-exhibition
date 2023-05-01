@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "bcrypt": "^5.1.0",
+    "bootstrap": "^5.2.3",
     "cookie-parser": "~1.4.4",
     "debug": "~2.6.9",
     "dotenv": "^16.0.3",
@@ -15,6 +16,7 @@
     "express": "~4.16.1",
     "express-flash": "^0.0.2",
     "express-session": "^1.17.3",
+    "gsap": "^3.11.5",
     "http-errors": "~1.6.3",
     "jsonwebtoken": "^9.0.0",
     "morgan": "~1.9.1",

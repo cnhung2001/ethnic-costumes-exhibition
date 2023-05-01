@@ -10,9 +10,9 @@
   </head>
   <body>
     <canvas class="webgl"></canvas>
-    <p>Hello</p>
+    <h1>Xin Chào</h1>
 
-    <h1>Welcome to room <%= roomId %>!</h1>
+    <h2>Chào mừng đến với Triển lãm trang phục các dân tộc Việt Nam</h2>
     <div
       id="overlay"
       style="
@@ -26,7 +26,11 @@
         transition: opacity 0.3s ease;
         pointer-events: none;
       "
-    ></div>
+    >
+      Hello
+    </div>
+
+    <button id="btn">Click me</button>
     <script
       type="module"
       src="../public/javascripts/room.js?id=<%= roomId %>"
