@@ -81,3 +81,8 @@ section .wrapper p {
 section .wrapper p a {
   color: #ff4584;
 }
+
+.form-error {
+  color: red;
+  margin: 10px auto;
+}

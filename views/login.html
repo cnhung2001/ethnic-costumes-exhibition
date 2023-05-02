@@ -9,9 +9,9 @@
   </head>
   <body>
     <section>
-      <div class="wrapper">
+      <div class="wrapper" style="margin: 0 auto">
         <h1>Đăng nhập</h1>
-        <form class="form-login" action="/auth/login" method="POST">
+        <form class="form-login" action="" method="POST">
           <div class="input-form">
             <label class="text" vfor="email">Email</label>
             <input
@@ -26,10 +26,13 @@
             <label class="text" for="password">Password</label>
             <input type="password" id="password" name="password" required />
           </div>
+          <div class="form-error"></div>
           <button type="submit">Đăng nhập</button>
         </form>
         <p>Bạn chưa có tài khoản?<a href="/register">Đăng ký</a></p>
       </div>
     </section>
   </body>
+
+  <script src="../public/javascripts/auth.js"></script>
 </html>

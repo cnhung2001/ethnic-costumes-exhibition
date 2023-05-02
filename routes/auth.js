@@ -22,7 +22,7 @@ router.post("/register", function (req, res) {
           bycrypt.hash(password, 10).then((hashedPassword) => {
             // create new user
             connection.query(
-              `INSERT INTO users (username, email, password, role) VALUES ('${username}', '${email}', '${hashedPassword}', 'user)`,
+              `INSERT INTO users (username, email, password, role) VALUES ('${username}', '${email}', '${hashedPassword}', 'user')`,
               (error) => {
                 if (error) {
                   console.error(error)
@@ -50,7 +50,7 @@ router.post("/login", (req, res) => {
   // check if user exists or not
   const { email, password } = req.body
   connection.query(
-    `SELECT * from users WHERE email = '${email}'`,
+    `SELECT users.*, rooms.RID from users join rooms on users.UID = rooms.RID WHERE email = '${email}'`,
     (err, result) => {
       if (err) {
         console.error(err)
@@ -68,12 +68,10 @@ router.post("/login", (req, res) => {
                 expiresIn: "30d",
               }
             )
-            return res
-              .cookie("access_token", access_token, {
-                httpOnly: true,
-                secure: process.env.NODE_ENV === "production",
-              })
-              .redirect("/")
+            return res.send({
+              userInfo: result[0],
+              access_token,
+            })
           } else {
             res.status(400).send({
               success: false,

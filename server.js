@@ -79,6 +79,20 @@ app.get("/rooms", (req, res) => {
   )
 })
 
+app.get("/users", (req, res) => {
+  connection.query(
+    "SELECT users.*, rooms.* from users join rooms on users.UID = rooms.RID;",
+    (error, results) => {
+      if (error) {
+        console.error(error)
+        res.status(500).send("Internal server error")
+      } else {
+        res.json(results)
+      }
+    }
+  )
+})
+
 app.get("/room-data", (req, res) => {
   const roomId = req.query.id
 

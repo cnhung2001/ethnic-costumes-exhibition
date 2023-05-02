@@ -1,18 +1,27 @@
 import * as THREE from "https://cdn.skypack.dev/three@0.129.0/build/three.module.js"
 import { OrbitControls } from "https://cdn.skypack.dev/three@0.129.0/examples/jsm/controls/OrbitControls.js"
 import { GLTFLoader } from "https://cdn.skypack.dev/three@0.129.0/examples/jsm/loaders/GLTFLoader.js"
-import datGui from "https://cdn.skypack.dev/dat.gui"
 import { TransformControls } from "https://cdn.skypack.dev/three@0.129.0/examples/jsm/controls/TransformControls.js"
-import tweenJsModernModule from "https://cdn.skypack.dev/tween-js-modern-module"
+import datGui from "https://cdn.skypack.dev/dat.gui"
+import { FirstPersonControls } from "https://cdn.skypack.dev/three@0.129.0/examples/jsm/controls/FirstPersonControls.js"
+//import postprocessing from "https://cdn.skypack.dev/postprocessing"
+import johhThreeEffectcomposer from "https://cdn.skypack.dev/@johh/three-effectcomposer"
+import { EffectComposer } from "https://cdn.skypack.dev/three@0.129.0/examples/jsm/postprocessing/EffectComposer.js"
+import { RenderPass } from "https://cdn.skypack.dev/three@0.129.0/examples/jsm/postprocessing/RenderPass.js"
 
-var roomId = new URLSearchParams(window.location.search).get("id")
+const roomId = new URLSearchParams(window.location.search).get("id")
+const userInfo = JSON.parse(localStorage.getItem("userInfo"))
+
+if (roomId != 1 && !userInfo) {
+  window.location.href = "/login"
+}
 
 const canvas = document.querySelector(".webgl")
 const scene = new THREE.Scene()
 
 const renderer = new THREE.WebGL1Renderer({
   canvas: canvas,
-  antialias: true,
+  antialias: false,
 })
 
 const sizes = {
@@ -29,14 +38,40 @@ const camera = new THREE.PerspectiveCamera(
 
 //set cam default
 camera.position.set(200, 50, 200)
+camera.aspect = sizes.width / sizes.height
 //camera.lookAt(140, 0, 250)
-console.log(camera.position)
+//console.log(camera.position)
 scene.add(camera)
 const controls = new OrbitControls(camera, renderer.domElement)
 
-const loaderModel = new GLTFLoader()
-const loaderImage = new THREE.TextureLoader()
-const loaderText = new THREE.FontLoader()
+const loadingManager = new THREE.LoadingManager()
+
+const loaderModel = new GLTFLoader(loadingManager)
+const loaderImage = new THREE.TextureLoader(loadingManager)
+const loaderText = new THREE.FontLoader(loadingManager)
+
+//loading
+const roomCanvas = document.querySelector(".room-container > canvas")
+loadingManager.onStart = function (url, iteam, total) {
+  console.log(`Started loading ${url}`)
+}
+
+const progressBar = document.getElementById("progress-bar")
+const loadingPercent = document.querySelector(".loading-percent")
+
+loadingManager.onProgress = function (url, loaded, total) {
+  progressBar.value = (loaded / total) * 100
+  loadingPercent.textContent = `${
+    Math.round((loaded / total) * 100 * 100) / 100
+  }%`
+}
+
+const progressBarContainer = document.querySelector(".progress-bar-container")
+
+loadingManager.onLoad = function () {
+  progressBarContainer.style.display = "none"
+  roomCanvas.style.display = "block"
+}
 
 scene.background = new THREE.Color("rgb(138, 193, 170)")
 
@@ -84,7 +119,7 @@ function loadPosition() {
               newModel.name = item.id
               scene.add(newModel)
               var helper = new THREE.BoxHelper(newModel)
-              //helper.visible = false
+              helper.visible = false
               scene.add(helper)
               objects.push({
                 model: newModel,
@@ -168,6 +203,15 @@ tControl.addEventListener("dragging-changed", (e) => {
   }
 })
 
+const fpcControls = new FirstPersonControls(camera, renderer.domElement)
+
+fpcControls.lookSpeed = 0.0125
+fpcControls.movementSpeed = 500
+fpcControls.noFly = false
+fpcControls.lookVertical = true
+
+fpcControls.lookAt(scene.position)
+
 const overlay = document.querySelector("#overlay")
 const popup = document.createElement("div")
 //popup.innerHTML =
@@ -180,20 +224,33 @@ popup.style.backgroundColor = "white"
 popup.style.padding = "20px"
 overlay.appendChild(popup)
 
+// const geometry = new THREE.BoxGeometry()
+// const material = new THREE.MeshBasicMaterial({
+//   color: 0x00ff00,
+//   wireframe: true,
+// })
+
+// const cube = new THREE.Mesh(geometry, material)
+// scene.add(cube)
+
+// const gui = new datGui.GUI()
+// const cubeFolder = gui.addFolder("Cube")
+// cubeFolder.add(selectedModel.rotation, "x", 0, Math.PI * 2)
+// cubeFolder.add(selectedModel.rotation, "y", 0, Math.PI * 2)
+// cubeFolder.add(selectedModel.rotation, "z", 0, Math.PI * 2)
+// cubeFolder.open()
+
+// const cameraFolder = gui.addFolder("Camera")
+// cameraFolder.add(camera.position, "z", 0, 10)
+// cameraFolder.open()
+
+// console.log(cubeFolder.name)
+
+// if (cubeFolder.name === "Cube") {
+// }
+
 const raycaster = new THREE.Raycaster()
 const mouse = new THREE.Vector2()
-
-// window.addEventListener("dblclick", (event) => {
-//   var mX = (event.clientX / window.innerWidth) * 2 - 1
-//   var mY = -(event.clientY / window.innerHeight) * 2 + 1
-
-//   var vector = new THREE.Vector3(mX, mY, 1)
-//   vector.unproject(camera)
-//   vector.sub(camera.position)
-//   camera.position.addVectors(camera.position, vector.setLength(20))
-//   controls.target.addVectors(controls.target, vector.setLength(20))
-//   console.log(controls.target)
-// })
 
 window.addEventListener("click", (event) => {
   if ((overlay.style.opacity = "1")) {
@@ -220,6 +277,7 @@ window.addEventListener("click", (event) => {
     console.log(tControl.enabled)
     console.log(selectedModel.userData.name)
     console.log(selectedModel.position.x)
+
     // controls.target.set(
     //   selectedModel.position.x,
     //   selectedModel.position.y,
@@ -305,6 +363,11 @@ light2.position.set(0, 30, 0)
 light2.lookAt(0, 0, 0)
 scene.add(light2)
 
+const light3 = new THREE.DirectionalLight(0xffffff, 0.5)
+light3.position.set(0, 30, -40)
+light3.lookAt(0, 0, 0)
+scene.add(light3)
+
 //controls.addEventListener("change", renderer) //error
 
 renderer.setSize(sizes.width, sizes.height)
@@ -313,6 +376,7 @@ renderer.shadowMap.enabled = true
 renderer.gammaOutput = true
 
 const cameraSpeed = 0.5
+
 function handleKeyDown(event) {
   const code = event.code
   if (code === "ArrowLeft") {
@@ -339,38 +403,16 @@ function handleKeyDown(event) {
     tControl.setMode("scale")
   }
   if (code === "KeyC") {
-    tControl.enabled = !tControl.enabled
+    if (userInfo?.role === "admin" || roomId == userInfo?.RID) {
+      tControl.enabled = !tControl.enabled
+    } else {
+      tControl.enabled = false
+    }
   }
   if (code === "Enter") {
   }
 }
 document.addEventListener("keydown", handleKeyDown)
-
-const geometry = new THREE.BoxGeometry()
-const material = new THREE.MeshBasicMaterial({
-  color: 0x00ff00,
-  wireframe: true,
-})
-
-const cube = new THREE.Mesh(geometry, material)
-scene.add(cube)
-
-const gui = new datGui.GUI()
-const cubeFolder = gui.addFolder("Cube")
-cubeFolder.add(cube.rotation, "x", 0, Math.PI * 2)
-cubeFolder.add(cube.rotation, "y", 0, Math.PI * 2)
-cubeFolder.add(cube.rotation, "z", 0, Math.PI * 2)
-cubeFolder.open()
-const cameraFolder = gui.addFolder("Camera")
-cameraFolder.add(camera.position, "z", 0, 10)
-cameraFolder.open()
-
-console.log(cubeFolder.name)
-
-if (cubeFolder.name === "Cube") {
-}
-
-var state = "play"
 
 const listener = new THREE.AudioListener()
 camera.add(listener)
@@ -385,21 +427,50 @@ audioLoader.load("./assets/sound/soundDemo.mp3", function (buffer) {
   backgroundSound.play()
 })
 
-var btn = document.getElementById("btn")
-btn.onclick = function myFunction() {
-  if (state == "play") {
-    backgroundSound.pause()
-    state = "stop"
-  } else if (state == "stop") {
+const soundBtn = document.querySelector(".sound")
+soundBtn.addEventListener("click", function () {
+  if (soundBtn.classList.contains("muted")) {
     backgroundSound.play()
-    state = "play"
+    soundBtn.classList.remove("muted")
+    soundBtn.innerHTML = `<svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="16"
+      height="16"
+      fill="currentColor"
+      class="bi bi-play-fill"
+      viewBox="0 0 16 16"
+    >
+      <path
+        d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"
+      />
+    </svg>`
+  } else {
+    backgroundSound.pause()
+    soundBtn.classList.add("muted")
+    soundBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pause" viewBox="0 0 16 16">
+    <path d="M6 3.5a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0V4a.5.5 0 0 1 .5-.5zm4 0a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0V4a.5.5 0 0 1 .5-.5z"/>
+  </svg>`
   }
-}
+})
 
-function animate() {
-  requestAnimationFrame(animate)
-  controls.update()
-  renderer.render(scene, camera)
-}
+console.log(objects)
+
+let composer = new EffectComposer(renderer)
+// const renderPass = new RenderPass(scene, camera)
+// composer.addPass(renderPass)
+composer.addPass(new RenderPass(scene, camera))
+
+// const effectPass = new EffectPass(camera, new BloomEffect())
+// effectPass.renderToScreen = true
+// composer.addPass(effectPass)
+// const glitchPass = new GlitchPass()
+// composer.addPass(glitchPass)
 
 animate()
+
+function animate() {
+  composer.render()
+  requestAnimationFrame(animate)
+  controls.update()
+  //renderer.render(scene, camera)
+}
