@@ -32,6 +32,7 @@ body {
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  z-index: 3;
 }
 
 #progress-bar {
@@ -93,4 +94,44 @@ label {
   justify-content: center;
   color: #fff;
   cursor: pointer;
+}
+
+header {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  position: absolute;
+  height: 74px;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: 15px;
+  background-color: transparent;
+  color: white;
+  z-index: 2;
+}
+
+.user-box {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.user-box svg {
+  margin-left: 20px;
+  cursor: pointer;
+}
+
+.user-box a {
+  color: #fff;
+  text-decoration: none;
+}
+
+.user-box p {
+  margin-bottom: 3px;
+}
+
+.popup-content {
+  max-height: 600px;
+  overflow-y: scroll;
 }

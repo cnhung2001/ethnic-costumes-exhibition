@@ -4,10 +4,10 @@ import { GLTFLoader } from "https://cdn.skypack.dev/three@0.129.0/examples/jsm/l
 import { TransformControls } from "https://cdn.skypack.dev/three@0.129.0/examples/jsm/controls/TransformControls.js"
 import datGui from "https://cdn.skypack.dev/dat.gui"
 import { FirstPersonControls } from "https://cdn.skypack.dev/three@0.129.0/examples/jsm/controls/FirstPersonControls.js"
-//import postprocessing from "https://cdn.skypack.dev/postprocessing"
 import johhThreeEffectcomposer from "https://cdn.skypack.dev/@johh/three-effectcomposer"
 import { EffectComposer } from "https://cdn.skypack.dev/three@0.129.0/examples/jsm/postprocessing/EffectComposer.js"
 import { RenderPass } from "https://cdn.skypack.dev/three@0.129.0/examples/jsm/postprocessing/RenderPass.js"
+import { Sky } from "https://cdn.skypack.dev/three@0.129.0/examples/jsm/objects/Sky.js"
 
 const roomId = new URLSearchParams(window.location.search).get("id")
 const userInfo = JSON.parse(localStorage.getItem("userInfo"))
@@ -42,6 +42,44 @@ camera.aspect = sizes.width / sizes.height
 //camera.lookAt(140, 0, 250)
 //console.log(camera.position)
 scene.add(camera)
+
+//sun
+let sky, sun
+sky = new Sky()
+sky.scale.setScalar(450000)
+scene.add(sky)
+
+sun = new THREE.Vector3()
+const effectController = {
+  turbidity: 10,
+  rayleigh: 2.5,
+  mieCoefficient: 0.005,
+  mieDirectionalG: 0.5,
+  elevation: 1.5,
+  azimuth: 180,
+  exposure: 1,
+}
+
+function guiChanged() {
+  const uniforms = sky.material.uniforms
+  uniforms["turbidity"].value = effectController.turbidity
+  uniforms["rayleigh"].value = effectController.rayleigh
+  uniforms["mieCoefficient"].value = effectController.mieCoefficient
+  uniforms["mieDirectionalG"].value = effectController.mieDirectionalG
+
+  const phi = THREE.MathUtils.degToRad(90 - effectController.elevation)
+  const theta = THREE.MathUtils.degToRad(effectController.azimuth)
+
+  sun.setFromSphericalCoords(1, phi, theta)
+
+  uniforms["sunPosition"].value.copy(sun)
+
+  renderer.toneMappingExposure = effectController.exposure
+  renderer.render(scene, camera)
+}
+
+guiChanged()
+
 const controls = new OrbitControls(camera, renderer.domElement)
 
 const loadingManager = new THREE.LoadingManager()
@@ -143,7 +181,8 @@ function loadPosition() {
           mesh.rotation.set(item.rx, item.ry, item.rz)
           mesh.scale.set(item.sx, item.sy, item.sz)
           scene.add(mesh)
-          mesh.name = item.id
+          mesh.name = item.Dpath.split("public/assets/image/")[1].split(".")[0]
+          mesh.eventType = "image"
           var helper = new THREE.BoxHelper(mesh)
           scene.add(helper)
           objects.push({
@@ -203,18 +242,8 @@ tControl.addEventListener("dragging-changed", (e) => {
   }
 })
 
-const fpcControls = new FirstPersonControls(camera, renderer.domElement)
-
-fpcControls.lookSpeed = 0.0125
-fpcControls.movementSpeed = 500
-fpcControls.noFly = false
-fpcControls.lookVertical = true
-
-fpcControls.lookAt(scene.position)
-
 const overlay = document.querySelector("#overlay")
 const popup = document.createElement("div")
-//popup.innerHTML =
 
 popup.style.position = "absolute"
 popup.style.top = "50%"
@@ -222,6 +251,7 @@ popup.style.left = "50%"
 popup.style.transform = "translate(-50%, -50%)"
 popup.style.backgroundColor = "white"
 popup.style.padding = "20px"
+popup.style.pointerEvents = "all"
 overlay.appendChild(popup)
 
 // const geometry = new THREE.BoxGeometry()
@@ -269,6 +299,24 @@ window.addEventListener("click", (event) => {
       (object) => object.boxHelper === intersects[0].object
     )
     const selectedModel = selectedObject.model
+
+    if (selectedModel.eventType === "image") {
+      controls.enablePan = false
+      controls.enableRotate = false
+      controls.enableZoom = false
+
+      overlay.style.opacity = "1"
+      fetch(`../../assets/data/${selectedModel.name}.html`)
+        .then((response) => response.text())
+        .then((text) => {
+          if (!text?.includes("Cannot")) {
+            popup.innerHTML = text
+          } else {
+            popup.innerHTML = "Khong co du lieu!"
+          }
+        })
+    }
+
     console.log("Clicked on object: ", selectedModel)
     tControl.attach(selectedModel)
     scene.add(tControl)
@@ -309,10 +357,6 @@ window.addEventListener("click", (event) => {
     //controls.target.set(selectedModel.item)
     // console.log(controls.enabled)
     // console.log(controls.enableZoom)
-
-    if (selectedModel.userData.name == "taynam021") {
-      overlay.style.opacity = "1"
-    }
   }
 })
 

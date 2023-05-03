@@ -186,7 +186,7 @@ loadPosition()
 const raycaster = new THREE.Raycaster()
 const mouse = new THREE.Vector2()
 
-window.addEventListener("click", (event) => {
+window.addEventListener("dblclick", (event) => {
   mouse.x = (event.clientX / window.innerWidth) * 2 - 1
   mouse.y = -(event.clientY / window.innerHeight) * 2 + 1
 
