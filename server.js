@@ -7,7 +7,7 @@ const logger = require("morgan")
 const connection = require("./config/database")
 require("dotenv").config()
 
-const port = process.env.PORT || 3000
+const port = process.env.PORT || 80
 
 app.set("views", "./views")
 app.set("view engine", "html")
@@ -192,7 +192,7 @@ app.get("/register", (req, res) => {
 app.post("/register", (req, res) => {})
 
 app.listen(80, () => {
-  console.log("Server is running on port 3000!");
+  console.log("Server is running on port 80!");
 });
 
 module.exports = app
