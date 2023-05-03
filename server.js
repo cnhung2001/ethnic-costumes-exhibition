@@ -191,8 +191,8 @@ app.get("/register", (req, res) => {
 
 app.post("/register", (req, res) => {})
 
-app.listen(8080, () => {
-  console.log("Server is running on 80!");
-});
+//app.listen(8080, () => {
+  //console.log("Server is running on 80!");
+//});
 
 module.exports = app
