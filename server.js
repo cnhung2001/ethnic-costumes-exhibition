@@ -67,7 +67,7 @@ app.get("/public/javascripts/*", function (req, res) {
 
 app.get("/rooms", (req, res) => {
   connection.query(
-    "SELECT rooms.*, Datas.Dpath FROM rooms JOIN datas ON rooms.DID = datas.DID;",
+    "SELECT rooms.*, datas.Dpath FROM rooms JOIN datas ON rooms.DID = datas.DID;",
     (error, results) => {
       if (error) {
         console.error(error)
@@ -93,11 +93,25 @@ app.get("/users", (req, res) => {
   )
 })
 
+app.get("/comments", (req, res) => {
+  connection.query(
+    "SELECT comments.*, users.name from users join comments on users.UID = comments.UID;",
+    (error, results) => {
+      if (error) {
+        console.error(error)
+        res.status(500).send("Internal server error")
+      } else {
+        res.json(results)
+      }
+    }
+  )
+})
+
 app.get("/room-data", (req, res) => {
   const roomId = req.query.id
 
   connection.query(
-    `SELECT  RoomDetails.id, Datas.Dtype, Datas.Dpath, RoomDetails.x, RoomDetails.y, RoomDetails.z, RoomDetails.rx, RoomDetails.ry, RoomDetails.rz, RoomDetails.sx, RoomDetails.sy, RoomDetails.sz FROM Datas JOIN RoomDetails ON Datas.DID = RoomDetails.DID WHERE RoomDetails.RID = '${roomId}';`,
+    `SELECT  roomdetails.id, datas.Dtype, datas.Dpath, roomdetails.x, roomdetails.y, roomdetails.z, roomdetails.rx, roomdetails.ry, roomdetails.rz, roomdetails.sx, roomdetails.sy, roomdetails.sz FROM datas JOIN roomdetails ON datas.DID = roomdetails.DID WHERE roomdetails.RID = '${roomId}';`,
     (error, results) => {
       if (error) {
         console.error(error)
@@ -112,7 +126,7 @@ app.get("/room-data", (req, res) => {
 app.get("/IslandHeader", (req, res) => {
   const roomId = req.query.id
   connection.query(
-    `SELECT IslandHeader.id, IslandHeader.rDid, IslandHeader.content, IslandHeader.fontpath, IslandHeader.size, IslandHeader.height, IslandHeader.color, RoomDetails.x, RoomDetails.y,  RoomDetails.z FROM IslandHeader JOIN RoomDetails ON IslandHeader.rDId = RoomDetails.id WHERE RoomDetails.RID = '${roomId}';`,
+    `SELECT islandheader.id, islandheader.rDid, islandheader.content, islandheader.fontpath, islandheader.size, islandheader.height, islandheader.color, roomdetails.x, roomdetails.y,  roomdetails.z FROM islandheader JOIN roomdetails ON islandheader.rDId = roomdetails.id WHERE roomdetails.RID = '${roomId}';`,
     (error, results) => {
       if (error) {
         console.error(error)
@@ -137,7 +151,7 @@ app.get("/IslandHeader", (req, res) => {
 // })
 
 app.get("/myroom", (req, res) => {
-  connection.query("SELECT * FROM Rooms", (error, results) => {
+  connection.query("SELECT * FROM rooms", (error, results) => {
     if (error) {
       console.error(error)
       res.status(500).send("Internal server error")
@@ -150,7 +164,7 @@ app.get("/myroom", (req, res) => {
 app.post("/save-data", function (req, res) {
   const { roomId, modelId, position, rotation, scale } = req.body
   connection.query(
-    `UPDATE RoomDetails SET x='${position.x}', y='${position.y}', z='${position.z}', rx='${rotation.x}', ry='${rotation.y}', rz='${rotation.z}', sx='${scale.x}',sy='${scale.y}', sz='${scale.z}' where id='${modelId.modelId}' ;`,
+    `UPDATE roomdetails SET x='${position.x}', y='${position.y}', z='${position.z}', rx='${rotation.x}', ry='${rotation.y}', rz='${rotation.z}', sx='${scale.x}',sy='${scale.y}', sz='${scale.z}' where id='${modelId.modelId}' ;`,
     (error, results) => {
       if (error) {
         console.error(error)
