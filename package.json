@@ -29,5 +29,6 @@
   },
   "devDependencies": {
     "nodemon": "^2.0.22"
-  }
+  },
+  "port": "80"
 }
