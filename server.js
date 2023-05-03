@@ -191,8 +191,8 @@ app.get("/register", (req, res) => {
 
 app.post("/register", (req, res) => {})
 
-http.listen(port, function () {
-  console.log("listening on *:" + port)
-})
+app.listen(3000, () => {
+  console.log("Server is running on port 3000!");
+});
 
 module.exports = app
