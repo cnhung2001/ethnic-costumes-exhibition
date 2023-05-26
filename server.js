@@ -95,7 +95,7 @@ app.get("/users", (req, res) => {
 
 app.get("/comments", (req, res) => {
   connection.query(
-    "SELECT comments.*, users.name from users join comments on users.UID = comments.UID;",
+    "SELECT comments.*, users.username from users join comments on users.UID = comments.UID;",
     (error, results) => {
       if (error) {
         console.error(error)
@@ -103,6 +103,18 @@ app.get("/comments", (req, res) => {
       } else {
         res.json(results)
       }
+    }
+  )
+})
+app.post("/comments", (req, res) => {
+  const comment = req.body
+  connection.query(
+    `INSERT INTO comments (uid, rid, content, timeCreate) VALUES ('${req.body.uid}', '${req.body.rid}', '${req.body.comment}', CURRENT_TIMESTAMP);`,
+    (error, results) => {
+      if (error) {
+        console.error(error)
+      }
+      console.log(results, "hu")
     }
   )
 })
@@ -137,6 +149,56 @@ app.get("/IslandHeader", (req, res) => {
       }
     }
   )
+})
+
+const multer = require("multer")
+const { log } = require("console")
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "public/assets/model/")
+  },
+  filename: function (req, file, cb) {
+    //const nameFile = req.file.originalname
+    cb(null, Date.now() + "-" + file.originalname)
+  },
+})
+
+const upload = multer({ storage: storage })
+
+app.post("/upload", upload.single("model"), function (req, res, next) {
+  connection.query(
+    `INSERT INTO datas(Dtype, Dpath) values ('model','${
+      "public/assets/model/" + req.file.filename
+    }');`,
+    (error, results) => {
+      if (error) {
+        console.error(error)
+        res.status(500).send("Internal server error")
+      } else {
+        res.json(results)
+      }
+      connection.query(
+        `INSERT INTO roomDetails(did, rid, x, y, z, rx, ry, rz, sx, sy, sz) values ('${results.insertId}', '2', '0', '0', '0','0', '0', '0', '1', '1', '1');`,
+        (error, results) => {
+          if (error) {
+            console.error(error)
+            res.status(500).send("Internal server error")
+          }
+        }
+      )
+    }
+  )
+
+  // connection.query(
+  //   `INSERT INTO RoomDetails (did, rid, x, y, z, rx, ry, rz, sx, sy, sz) VALUES ('${did}', '${req.body.rid}','0','0','0','0','0','0', '1','1','1');`,
+  //   (error, results) => {
+  //     if (error) {
+  //       console.error(error)
+  //       res.status(500).send("Internal server error")
+  //     }
+  //   }
+  // )
 })
 
 // app.get("/myroom", (req, res) => {
@@ -192,7 +254,7 @@ app.get("/register", (req, res) => {
 app.post("/register", (req, res) => {})
 
 app.listen(3000, () => {
-  console.log("Server is running on 3000!");
-});
+  console.log("Server is running on 3000!")
+})
 
 module.exports = app

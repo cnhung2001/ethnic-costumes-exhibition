@@ -3,13 +3,12 @@ import { OrbitControls } from "https://cdn.skypack.dev/three@0.129.0/examples/js
 import { GLTFLoader } from "https://cdn.skypack.dev/three@0.129.0/examples/jsm/loaders/GLTFLoader.js"
 import { TransformControls } from "https://cdn.skypack.dev/three@0.129.0/examples/jsm/controls/TransformControls.js"
 import datGui from "https://cdn.skypack.dev/dat.gui"
-import { FirstPersonControls } from "https://cdn.skypack.dev/three@0.129.0/examples/jsm/controls/FirstPersonControls.js"
-import johhThreeEffectcomposer from "https://cdn.skypack.dev/@johh/three-effectcomposer"
+
 import { EffectComposer } from "https://cdn.skypack.dev/three@0.129.0/examples/jsm/postprocessing/EffectComposer.js"
 import { RenderPass } from "https://cdn.skypack.dev/three@0.129.0/examples/jsm/postprocessing/RenderPass.js"
 import { Sky } from "https://cdn.skypack.dev/three@0.129.0/examples/jsm/objects/Sky.js"
 
-const roomId = new URLSearchParams(window.location.search).get("id")
+var roomId = new URLSearchParams(window.location.search).get("id")
 const userInfo = JSON.parse(localStorage.getItem("userInfo"))
 
 if (roomId != 1 && !userInfo) {
@@ -72,6 +71,7 @@ function guiChanged() {
 
   sun.setFromSphericalCoords(1, phi, theta)
 
+  //console.log(theta)
   uniforms["sunPosition"].value.copy(sun)
 
   renderer.toneMappingExposure = effectController.exposure
@@ -90,9 +90,6 @@ const loaderText = new THREE.FontLoader(loadingManager)
 
 //loading
 const roomCanvas = document.querySelector(".room-container > canvas")
-loadingManager.onStart = function (url, iteam, total) {
-  console.log(`Started loading ${url}`)
-}
 
 const progressBar = document.getElementById("progress-bar")
 const loadingPercent = document.querySelector(".loading-percent")
@@ -135,6 +132,20 @@ const loadAsync = (url) => {
 // const cube = new THREE.Mesh(geometry, material)
 // scene.add(cube)
 // cube.position.set(15, 0, 0)
+
+const overlay = document.querySelector("#overlay")
+const popup = document.createElement("div")
+
+var state = true
+
+popup.style.position = "absolute"
+popup.style.top = "50%"
+popup.style.left = "50%"
+popup.style.transform = "translate(-50%, -50%)"
+popup.style.backgroundColor = "white"
+popup.style.padding = "20px"
+popup.style.pointerEvents = "all"
+overlay.appendChild(popup)
 
 const tControl = new TransformControls(camera, renderer.domElement)
 
@@ -230,15 +241,48 @@ function loadPosition() {
       })
     })
     .catch((error) => console.error(error))
-  // fetch(`/comments`)
-  //   .then((response) => response.json())
-  //   .then((data) => {
-  //     data.forEach((item) => {
-  //       console.log(item)
-  //     })
-  //   })
-  //   .catch((error) => console.error(error))
+  fetch(`/comments?id=${roomId}`)
+    .then((response) => response.json())
+    .then((data) => {
+      data.forEach((item) => {
+        const nameUser = `<h3>${item.username}</h3>`
+        const commentContent = `<p>${item.content}</p>`
+        document.getElementById("comment").insertAdjacentHTML(
+          "beforeend",
+          `<div class="comment-item">
+            <div class="comment-item__avatar">
+              <img src="/public/assets/image/avatar-placeholder.png" alt="avatar" />
+            </div>
+            <div class="comment-item__content">
+            ${nameUser}
+            ${commentContent}
+            </div>
+          </div>`
+        )
+      })
+    })
+    .catch((error) => console.error(error))
 }
+
+const commentBtn = document.querySelector(".comment")
+commentBtn.addEventListener("click", function () {
+  if (state == true) {
+    document.querySelector(".comment-container").style.display = "block"
+    state = false
+  } else if (state == false) {
+    document.querySelector(".comment-container").style.display = "none"
+    state = true
+  }
+  console.log(state)
+})
+// const uidInput = document.querySelector('input[name="uid')
+// uidInput.value = userInfo.UID
+// const ridInput = document.querySelector('input[name="rid')
+// ridInput.value = userInfo.RID
+
+// const ridInputFile = document.querySelector('input[name="ridupload')
+// //console.log(ridInputFile.value)
+// ridInputFile.value = roomId
 
 loadPosition()
 
@@ -250,49 +294,13 @@ tControl.addEventListener("dragging-changed", (e) => {
   }
 })
 
-const overlay = document.querySelector("#overlay")
-const popup = document.createElement("div")
-
-popup.style.position = "absolute"
-popup.style.top = "50%"
-popup.style.left = "50%"
-popup.style.transform = "translate(-50%, -50%)"
-popup.style.backgroundColor = "white"
-popup.style.padding = "20px"
-popup.style.pointerEvents = "all"
-overlay.appendChild(popup)
-
-// const geometry = new THREE.BoxGeometry()
-// const material = new THREE.MeshBasicMaterial({
-//   color: 0x00ff00,
-//   wireframe: true,
-// })
-
-// const cube = new THREE.Mesh(geometry, material)
-// scene.add(cube)
-
-// const gui = new datGui.GUI()
-// const cubeFolder = gui.addFolder("Cube")
-// cubeFolder.add(selectedModel.rotation, "x", 0, Math.PI * 2)
-// cubeFolder.add(selectedModel.rotation, "y", 0, Math.PI * 2)
-// cubeFolder.add(selectedModel.rotation, "z", 0, Math.PI * 2)
-// cubeFolder.open()
-
-// const cameraFolder = gui.addFolder("Camera")
-// cameraFolder.add(camera.position, "z", 0, 10)
-// cameraFolder.open()
-
-// console.log(cubeFolder.name)
-
-// if (cubeFolder.name === "Cube") {
-// }
-
 const raycaster = new THREE.Raycaster()
 const mouse = new THREE.Vector2()
 
 window.addEventListener("click", (event) => {
   if ((overlay.style.opacity = "1")) {
     overlay.style.opacity = "0"
+    overlay.style.display = "none"
   }
 
   mouse.x = (event.clientX / window.innerWidth) * 2 - 1
@@ -309,11 +317,12 @@ window.addEventListener("click", (event) => {
     const selectedModel = selectedObject.model
 
     if (selectedModel.eventType === "image") {
-      controls.enablePan = false
-      controls.enableRotate = false
-      controls.enableZoom = false
+      // controls.enablePan = false
+      // controls.enableRotate = false
+      // controls.enableZoom = false
 
       overlay.style.opacity = "1"
+      overlay.style.display = "block"
       fetch(`../../assets/data/${selectedModel.name}.html`)
         .then((response) => response.text())
         .then((text) => {
@@ -325,14 +334,14 @@ window.addEventListener("click", (event) => {
         })
     }
 
-    console.log("Clicked on object: ", selectedModel)
+    //console.log("Clicked on object: ", selectedModel)
     tControl.attach(selectedModel)
     scene.add(tControl)
     tControl.setMode("translate")
     tControl.enabled = false
-    console.log(tControl.enabled)
-    console.log(selectedModel.userData.name)
-    console.log(selectedModel.position.x)
+    //console.log(tControl.enabled)
+    //console.log(selectedModel.userData.name)
+    //console.log(selectedModel.position.x)
 
     // controls.target.set(
     //   selectedModel.position.x,
@@ -361,16 +370,8 @@ window.addEventListener("click", (event) => {
 
       controls.update()
     })
-
-    //controls.target.set(selectedModel.item)
-    // console.log(controls.enabled)
-    // console.log(controls.enableZoom)
   }
 })
-
-// const searchParams = new URLSearchParams(window.location.search)
-// const roomId = searchParams.get("id")
-// console.log(objects)
 
 document.addEventListener("keydown", function (event) {
   if (event.key === "Enter") {
@@ -461,8 +462,9 @@ function handleKeyDown(event) {
       tControl.enabled = false
     }
   }
-  if (code === "Enter") {
-  }
+  // if (code === "KeyC") {
+  //   tControl.enabled = true
+  // }
 }
 document.addEventListener("keydown", handleKeyDown)
 
@@ -504,8 +506,6 @@ soundBtn.addEventListener("click", function () {
   </svg>`
   }
 })
-
-console.log(objects)
 
 let composer = new EffectComposer(renderer)
 // const renderPass = new RenderPass(scene, camera)

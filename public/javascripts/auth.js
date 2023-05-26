@@ -1,3 +1,4 @@
+// login
 const formLogin = document.querySelector(".form-login")
 
 if (formLogin) {
@@ -25,6 +26,41 @@ if (formLogin) {
         } else {
           localStorage.setItem("userInfo", JSON.stringify(data.userInfo))
           window.location.href = "/"
+        }
+      })
+      .catch((err) => console.log(err))
+  })
+}
+
+// register
+const formRegister = document.querySelector(".form-register")
+
+if (formRegister) {
+  formRegister.addEventListener("submit", function (e) {
+    e.preventDefault()
+
+    const username = document.querySelector("#username").value
+    const email = document.querySelector("#email").value
+    const password = document.querySelector("#password").value
+
+    fetch("/auth/register", {
+      headers: {
+        "Content-Type": "application/json",
+      },
+      method: "POST",
+      body: JSON.stringify({
+        username,
+        email,
+        password,
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (!data.success && data.msg) {
+          document.querySelector(".form-error").textContent = `${data.msg}`
+          return
+        } else {
+          window.location.href = "/login"
         }
       })
       .catch((err) => console.log(err))

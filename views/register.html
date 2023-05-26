@@ -5,24 +5,52 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
+    <link rel="stylesheet" href="../public/stylesheets/style-auth.css" />
   </head>
   <body>
-    <h1>Register</h1>
-    <form action="/auth/register" method="POST">
-      <div>
-        <label for="username">Username</label>
-        <input type="text" id="username" name="username" required />
+    <section>
+      <div class="wrapper" style="margin: 0 auto">
+        <h1>Register</h1>
+        <form class="form-auth form-register" action="" method="POST">
+          <div class="input-form">
+            <label for="username">Username</label>
+            <input
+              class="form-input"
+              type="text"
+              id="username"
+              name="username"
+              required
+              autocomplete="off"
+            />
+          </div>
+          <div class="input-form">
+            <label for="email">Email</label>
+            <input
+              class="form-input"
+              type="email"
+              id="email"
+              name="email"
+              required
+            />
+          </div>
+          <div class="input-form">
+            <label for="password">Password</label>
+            <input
+              class="form-input"
+              type="password"
+              id="password"
+              name="password"
+              required
+            />
+          </div>
+
+          <div class="form-error"></div>
+          <button type="submit">Register</button>
+        </form>
+        <a href="/login">Login</a>
       </div>
-      <div>
-        <label for="email">Email</label>
-        <input type="email" id="email" name="email" required />
-      </div>
-      <div>
-        <label for="password">Password</label>
-        <input type="password" id="password" name="password" required />
-      </div>
-      <button type="submit">Register</button>
-    </form>
-    <a href="/login">Login</a>
+    </section>
+
+    <script src="../public/javascripts/auth.js"></script>
   </body>
 </html>

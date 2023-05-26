@@ -135,3 +135,86 @@ header {
   max-height: 600px;
   overflow-y: scroll;
 }
+
+#comment {
+  margin-top: 20px;
+}
+
+.comment-container {
+  border-radius: 6px;
+}
+
+.comment-item {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.comment-item .comment-item__avatar img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.comment-item .comment-item__content {
+  flex: 1;
+  margin-left: 10px;
+}
+
+.comment-content {
+  padding-top: 8px;
+  padding-left: 16px;
+}
+
+.title-comment {
+  width: fit-content;
+  font-size: 20px;
+}
+
+#comment h3 {
+  font-size: 18px;
+}
+
+#comment p {
+  font-size: 15px;
+}
+
+#comment-form {
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 10px;
+}
+
+#comment-form label {
+  margin-bottom: 10px;
+}
+
+#comment-input {
+  border-radius: 20px;
+  outline: none;
+}
+
+.comment-input-box {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.comment-input-box textarea {
+  flex: 1;
+  height: 35px;
+  padding: 3px 10px;
+}
+
+#button-comment {
+  border-radius: 10px;
+  border: 0;
+  outline: none;
+  background: #6096b4;
+  height: 35px;
+  width: 60px;
+  color: #fff;
+  margin-left: 20px;
+}

@@ -11,7 +11,7 @@
       integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ"
       crossorigin="anonymous"
     />
-    <title>Document</title>
+    <title>Triển lãm</title>
   </head>
   <body>
     <header>
@@ -38,7 +38,12 @@
           class="guide"
           data-bs-toggle="popover"
           data-bs-title="Hướng dẫn"
-          data-bs-content="ahaahah"
+          data-bs-content="<p>Sử dụng chuột trái để xoay camera<br>
+          Sử dụng chuột phải để chuyển camera <br>
+          Sử dụng con lăn chuột để zoom camera<br>
+          Click 2 lần vào đảo để xem chi tiết 
+          <p>"
+          data-bs-html="true"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -50,6 +55,20 @@
           >
             <path
               d="M5.255 5.786a.237.237 0 0 0 .241.247h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286zm1.557 5.763c0 .533.425.927 1.01.927.609 0 1.028-.394 1.028-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94z"
+            />
+          </svg>
+        </div>
+        <div class="comment">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            fill="currentColor"
+            class="bi bi-chat-dots-fill"
+            viewBox="0 0 16 16"
+          >
+            <path
+              d="M16 8c0 3.866-3.582 7-8 7a9.06 9.06 0 0 1-2.347-.306c-.584.296-1.925.864-4.181 1.234-.2.032-.352-.176-.273-.362.354-.836.674-1.95.77-2.966C.744 11.37 0 9.76 0 8c0-3.866 3.582-7 8-7s8 3.134 8 7zM5 8a1 1 0 1 0-2 0 1 1 0 0 0 2 0zm4 0a1 1 0 1 0-2 0 1 1 0 0 0 2 0zm3 1a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"
             />
           </svg>
         </div>
@@ -74,10 +93,52 @@
         opacity: 0;
         transition: opacity 0.3s ease;
         pointer-events: none;
+        
       "
     ></div>
+    <div
+      class="comment-container"
+      style="
+        position: absolute;
+        top: 100px;
+        left: 300px;
+        width: 70%;
+        height: 70%;
+        background-color: white;
+        display: none;
+        transition: opacity 0.3s ease;
+        pointer-events: all;
+        overflow-y: auto;
+      "
+    >
+      <div class="comment-content">
+        <h1 class="title-comment">BÌNH LUẬN</h1>
+        <div id="comment"></div>
 
-    <!-- <button id="btn">Click me</button> -->
+        <form onSubmit="addComment(); return false;" id="comment-form" action="/comments" method="POST">
+          <label for="comment" style="color: black;">Nhập bình luận của bạn:</label>
+          <input id="uid" type="hidden" name="uid" value="">
+          <input type="hidden" name="rid" value="">
+          <div class="comment-input-box">
+            <textarea id="comment-input" name="comment"></textarea>
+            <button id="button-comment" type="submit">Gửi</button>
+          </div>
+        </form>
+        <!-- <div>
+          <form id = upload-form action="/upload" method="POST" enctype="multipart/form-data">
+            <input type="file" name="model" accept=".gltf, .glb">
+            <input type="submit" value="Upload">
+          <input id="ridupload" type="hidden" name="ridupload" value="">
+            
+          </form>
+        </div> -->
+
+        
+      </div>
+      
+      </div>
+    </div>
+
     <script
       src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
       integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe"
@@ -96,6 +157,21 @@
       var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
         return new bootstrap.Tooltip(tooltipTriggerEl)
       })
+
+      function addComment() {
+        
+        var commentContent = document.getElementById("comment-input").value;
+        var UID = document.getElementById("uid").value;
+
+  // add to comment list
+  document
+          .getElementById("comment")
+          .insertAdjacentHTML("beforeend", UID)
+        document
+          .getElementById("comment")
+          .insertAdjacentHTML("beforeend", commentContent)
+
+}
     </script>
     <script
       type="module"

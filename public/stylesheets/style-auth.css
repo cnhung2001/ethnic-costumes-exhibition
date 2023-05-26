@@ -20,8 +20,8 @@ section .wrapper {
   flex-direction: column;
 }
 
-section .wrapper .form-login {
-  width: 50%;
+section .wrapper .form-auth {
+  width: 60%;
 }
 
 section .wrapper h1 {
@@ -35,11 +35,11 @@ section .wrapper h1 {
   letter-spacing: 1px;
 }
 
-section .wrapper .form-login .input-form {
+section .wrapper .form-auth .input-form {
   margin-bottom: 20px;
 }
 
-section .wrapper .form-login .input-form .text {
+section .wrapper .form-auth .input-form .text {
   font-size: 16px;
   margin-bottom: 5px;
   display: inline-block;
@@ -47,7 +47,7 @@ section .wrapper .form-login .input-form .text {
   letter-spacing: 1px;
 }
 
-section .wrapper .form-login .input-form input {
+section .wrapper .form-auth .input-form input {
   width: 100%;
   padding: 10px 20px;
   outline: none;
@@ -59,7 +59,8 @@ section .wrapper .form-login .input-form input {
   border-radius: 30px;
 }
 
-section .wrapper .form-login button {
+section .wrapper .form-auth button {
+  margin: 0 auto;
   background: #ff4584;
   color: #fff;
   outline: none;

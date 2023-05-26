@@ -142,7 +142,7 @@ function loadPosition() {
             function (font) {
               const geometry = new THREE.TextGeometry(item.name, {
                 font: font,
-                size: 1.5,
+                size: 1,
                 height: 0.2,
                 curveSegments: 10,
                 bevelEnabled: false,
@@ -157,9 +157,9 @@ function loadPosition() {
               ]
               const textMesh3 = new THREE.Mesh(geometry, materials)
               textMesh3.castShadow = true
-              textMesh3.position.x = item.x + 5
+              textMesh3.position.x = item.x + 9
               textMesh3.position.y = item.y + 1
-              textMesh3.position.z = item.z + 4
+              textMesh3.position.z = item.z + 6
               textMesh3.rotation.y = 1.57
 
               scene.add(textMesh3)

@@ -12,11 +12,17 @@ router.post("/register", function (req, res) {
     (error, results) => {
       if (error) {
         console.error(error)
-        res.status(500).send("Internal server error")
+        res.status(500).send({
+          success: false,
+          msg: "Internal server error",
+        })
       } else {
         // check if user exists
         if (results.length) {
-          res.status(400).send("User has already registed.")
+          res.status(400).send({
+            success: false,
+            msg: "User has already registed.",
+          })
         } else {
           // hash password for secure
           bycrypt.hash(password, 10).then((hashedPassword) => {
@@ -26,7 +32,10 @@ router.post("/register", function (req, res) {
               (error) => {
                 if (error) {
                   console.error(error)
-                  res.status(500).send("Internal server error")
+                  res.status(500).send({
+                    success: false,
+                    msg: "Internal server error",
+                  })
                 } else {
                   res.send({
                     success: true,
@@ -50,7 +59,7 @@ router.post("/login", (req, res) => {
   // check if user exists or not
   const { email, password } = req.body
   connection.query(
-    `SELECT users.*, rooms.RID from users join rooms on users.UID = rooms.RID WHERE email = '${email}'`,
+    `SELECT * FROM users WHERE email = '${email}'`,
     (err, result) => {
       if (err) {
         console.error(err)
